@@ -28,8 +28,18 @@ app.get('/api/persons', (req, res) => {
     res.json(persons);
 });
 
+app.get('/api/persons/:id', (req, res) => {
+    const id = Number(req.params.id);
+    const person = persons.find(e => e.id === id);
+
+    if (!person)
+        res.status(404).end();
+    else
+        res.json(person);
+});
+
 app.get('/info', (req, res) => {
-  res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
+    res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
 });
 
 const PORT = 3001;
