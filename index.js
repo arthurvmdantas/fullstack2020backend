@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 
+app.use(express.json());
+
 let persons = [
     {
         id: 1,
@@ -45,6 +47,17 @@ app.get('/info', (req, res) => {
 app.delete('/api/persons/:id', (req, res) => {
     const id = Number(req.params.id);
     persons = persons.filter(e => e.id !== id);
+
+    res.json(persons);
+});
+
+app.post('/api/persons', (req, res) => {
+    const max = 1000;
+    const min = 1;
+    const body = req.body;
+
+    body.id = Math.floor(Math.random() * (max - min)) + min;
+    persons = persons.concat(body);
 
     res.json(persons);
 });
