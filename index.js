@@ -57,8 +57,14 @@ app.post('/api/persons', (req, res) => {
     const body = req.body;
 
     body.id = Math.floor(Math.random() * (max - min)) + min;
-    persons = persons.concat(body);
 
+    if (!body.hasOwnProperty("name") || !body.hasOwnProperty("number"))
+        return res.json({ error: "'name' and 'number' are required" });
+
+    if (persons.find(e => e.name === body.name))
+        return res.json({ error: "name must be unique" });
+
+    persons = persons.concat(body);
     res.json(persons);
 });
 
