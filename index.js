@@ -1,8 +1,11 @@
 const express = require("express");
-const app = express();
 const morgan = require('morgan');
+const cors = require('cors');
+
+const app = express();
 
 app.use(express.json());
+app.use(cors());
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms - :body'));
 
 morgan.token('body', (req, res) => JSON.stringify(req.body));
@@ -69,7 +72,7 @@ app.post('/api/persons', (req, res) => {
         return res.json({ error: "name must be unique" });
 
     persons = persons.concat(body);
-    res.json(persons);
+    res.json(body);
 });
 
 const PORT = 3001;
