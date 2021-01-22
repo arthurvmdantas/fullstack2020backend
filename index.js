@@ -36,6 +36,15 @@ let persons = [
     }
 ];
 
+app.get('/info', (req, res, next) => {
+    Person.estimatedDocumentCount((error, result) => {
+        if (error)
+            next(error);
+        else
+            res.send(`<p>Phonebook has info for ${result} people</p><p>${new Date()}</p>`)
+    })
+});
+
 app.get('/api/persons', (req, res) => {
     Person.find({})
         .then(result => {
@@ -43,25 +52,37 @@ app.get('/api/persons', (req, res) => {
         })
 });
 
-app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id);
-    const person = persons.find(e => e.id === id);
+app.get('/api/persons/:id', async (req, res) => {
+    try {
+        const person = await Person.findById(req.params.id);
 
-    if (!person)
-        res.status(404).end();
-    else
-        res.json(person);
+        if (!person)
+            res.status(404).end();
+        else
+            res.json(person);
+    }
+    catch (error) {
+        console.log(error);
+        res.status(400).send({ error: "malformatted id" });
+    }
 });
 
-app.get('/info', (req, res) => {
-    res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
+app.delete('/api/persons/:id', (req, res, next) => {
+    Person.findByIdAndDelete(req.params.id)
+        .then(() => {
+            res.status(204).end();
+        })
+        .catch(error => next(error))
 });
 
-app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id);
-    persons = persons.filter(e => e.id !== id);
+app.put('/api/persons/:id', (req, res, next) => {
+    const body = req.body;
 
-    res.json(persons);
+    Person.findByIdAndUpdate(req.params.id, body, { new: true })
+        .then(updatedNote => {
+            res.json(updatedNote);
+        })
+        .catch(error => next(error));
 });
 
 app.post('/api/persons', (req, res) => {
@@ -79,6 +100,21 @@ app.post('/api/persons', (req, res) => {
         .then(result => {
             res.json(result);
         })
+});
+
+// 404
+app.use((req, res) => {
+    res.status(404).send({ error: "unkown endpoint" });
+});
+
+// error handling middleware
+app.use((err, req, res, next) => {
+    console.log(err.message);
+
+    if (err.name === 'CastError')
+        return res.status(400).send({ error: "malformatted id" });
+
+    next(error);
 });
 
 const PORT = process.env.PORT;
