@@ -65,20 +65,20 @@ app.delete('/api/persons/:id', (req, res) => {
 });
 
 app.post('/api/persons', (req, res) => {
-    const max = 1000;
-    const min = 1;
     const body = req.body;
-
-    body.id = Math.floor(Math.random() * (max - min)) + min;
 
     if (!body.hasOwnProperty("name") || !body.hasOwnProperty("number"))
         return res.json({ error: "'name' and 'number' are required" });
 
-    if (persons.find(e => e.name === body.name))
-        return res.json({ error: "name must be unique" });
+    const person = new Person({
+        name: body.name,
+        number: body.number
+    });
 
-    persons = persons.concat(body);
-    res.json(body);
+    person.save()
+        .then(result => {
+            res.json(result);
+        })
 });
 
 const PORT = process.env.PORT;
